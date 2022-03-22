@@ -137,13 +137,9 @@ namespace SH_Camera
             int bytesRead;
             int bytesWritten;
 
-            double hAngleY;
-            double hAngleX;
-            double vAngle;
-
-            float ySpeed = 0f;
-            float xSpeed = 0f;
-            float zSpeed = 0f;
+            //double hAngleY;
+            //double hAngleX;
+            //double vAngle;
 
             while(_running)
             {
