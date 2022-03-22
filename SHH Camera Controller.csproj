@@ -9,10 +9,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="234234.jpg" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Resource Include="234234.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
