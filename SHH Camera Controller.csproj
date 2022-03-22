@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net6.0-windows</TargetFramework>
-    <RootNamespace>SH_Camera</RootNamespace>
+    <RootNamespace>SHH_Camera_Controller</RootNamespace>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
   </PropertyGroup>
@@ -13,7 +13,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="234234.jpg" />
+    <Resource Include="234234.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
 
 </Project>
