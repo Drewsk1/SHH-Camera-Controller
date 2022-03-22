@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.1.32228.430
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SH Camera", "SH Camera.csproj", "{3B57BBDC-B59B-4105-B062-32C4AA27497F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SHH Camera Controller", "SHH Camera Controller.csproj", "{3B57BBDC-B59B-4105-B062-32C4AA27497F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
