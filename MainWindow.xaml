@@ -1,9 +1,9 @@
-﻿<Window x:Name="SHCWindow" x:Class="SH_Camera.MainWindow"
+﻿<Window x:Name="SHCWindow" x:Class="SHH_Camera_Controller.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:SH_Camera"
+        xmlns:local="clr-namespace:SHH_Camera_Controller"
         mc:Ignorable="d"
         Title="SH Camera Controller" Height="450" Width="800" ResizeMode="NoResize" Icon="/234234.jpg" Closing="SHCWindow_Closing">
     <Grid HorizontalAlignment="Center" Margin="0,0,0,0" VerticalAlignment="Center" Width="800" Height="450" Background="#FF333333">
@@ -15,5 +15,8 @@
         <Label x:Name="CameraYawSine_Label" Content="0" HorizontalAlignment="Left" Margin="10,130,0,0" VerticalAlignment="Top" Width="100" Height="30" FontSize="14" FontWeight="Bold" BorderThickness="2,2,2,2" Foreground="#FF960000"/>
         <Label x:Name="CameraYawCosine_Label" Content="0" HorizontalAlignment="Left" Margin="10,160,0,0" VerticalAlignment="Top" Width="100" Height="30" FontSize="14" FontWeight="Bold" BorderThickness="2,2,2,2" Foreground="#FF960000"/>
         <Label x:Name="CameraPitchSine_Label" Content="0" HorizontalAlignment="Left" Margin="10,200,0,0" VerticalAlignment="Top" Width="100" Height="30" FontSize="14" FontWeight="Bold" BorderThickness="2,2,2,2" Foreground="#FF960000"/>
+        <Slider x:Name="CameraSpeed_Slider" HorizontalAlignment="Left" Margin="10,279,0,0" VerticalAlignment="Top" Width="318" ValueChanged="Slider_ValueChanged" Maximum="100" Minimum="1" SmallChange="1" Value="5" IsEnabled="False" IsSnapToTickEnabled="True"/>
+        <Label x:Name="CameraSpeed_Label" Content="Camera Speed:" HorizontalAlignment="Left" Margin="57,248,0,0" VerticalAlignment="Top" Foreground="#FF960000" FontSize="16"/>
+        <Label x:Name="CameraSpeedValue_Label" Content="5" HorizontalAlignment="Left" Margin="178,248,0,0" VerticalAlignment="Top" Foreground="#FF960000" FontSize="16"/>
     </Grid>
 </Window>

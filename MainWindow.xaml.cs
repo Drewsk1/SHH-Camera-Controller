@@ -6,14 +6,14 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
 
-namespace SH_Camera
+namespace SHH_Camera_Controller
 {
     public partial class MainWindow : Window
     {
 
         #region fields
 
-        private const double Radians2Degrees = 57.2957795130823f;
+        private const float Radians2Degrees = 57.29578f;
 
         private Thread? _guiThread;
         private Thread? _injectThread;
@@ -49,10 +49,10 @@ namespace SH_Camera
         private ProcessModule _procMod;
 
         private IntPtr _cameraCoordinateAddress;
-        private IntPtr _cameraHorizontalRotationAddress;
-        private IntPtr _cameraVerticalRotationAddress;
-        private IntPtr _cameraXMethodAddress;
-        private IntPtr _cameraYMethodAddress;
+        private IntPtr _cameraYawAddress;
+        private IntPtr _cameraPitchAddress;
+        private IntPtr _cameraXAssemblyAddress;
+        private IntPtr _cameraYAssemblyAddress;
 
         private Stopwatch _stopWatch;
         private TimeSpan _stopWatchInterval;
@@ -65,10 +65,10 @@ namespace SH_Camera
             InitializeComponent();
 
             _cameraCoordinateAddress = (IntPtr)0x1158F1C0;
-            _cameraHorizontalRotationAddress = (IntPtr)0x1158F190;
-            _cameraVerticalRotationAddress = (IntPtr)0x1158F1A4;
-            _cameraXMethodAddress = (IntPtr)0x1053CC8A; // 66 0F D6 42 30 //90 90 90 90 90
-            _cameraYMethodAddress = (IntPtr)0x1053CC94; // 66 0F D6 42 38 //90 90 90 90 90
+            _cameraYawAddress = (IntPtr)0x1158F190;
+            _cameraPitchAddress = (IntPtr)0x1158F1A4;
+            _cameraXAssemblyAddress = (IntPtr)0x1053CC8A; // 66 0F D6 42 30 //90 90 90 90 90
+            _cameraYAssemblyAddress = (IntPtr)0x1053CC94; // 66 0F D6 42 38 //90 90 90 90 90
 
             _cameraSpeed = 5f;
 
@@ -93,6 +93,8 @@ namespace SH_Camera
 
             AttachButton.IsEnabled = true;
             InjectButton.IsEnabled = false;
+
+            CameraSpeed_Slider.IsEnabled = true;
 
             _running = true;
 
@@ -151,10 +153,10 @@ namespace SH_Camera
                     //_cameraZ = BitConverter.ToSingle(MemoryUtility.ReadMemory(_process[0], _cameraCoordinateAddress + 4, 4, out bytesRead));
                     //_cameraY = BitConverter.ToSingle(MemoryUtility.ReadMemory(_process[0], _cameraCoordinateAddress + 8, 4, out bytesRead));
 
-                    _cameraYawSine = BitConverter.ToSingle(MemoryUtility.ReadMemory(_process[0], _cameraHorizontalRotationAddress, 4, out bytesRead));
-                    _cameraYawCosine = BitConverter.ToSingle(MemoryUtility.ReadMemory(_process[0], _cameraHorizontalRotationAddress + 32, 4, out bytesRead));
+                    _cameraYawSine = BitConverter.ToSingle(MemoryUtility.ReadMemory(_process[0], _cameraYawAddress, 4, out bytesRead));
+                    _cameraYawCosine = BitConverter.ToSingle(MemoryUtility.ReadMemory(_process[0], _cameraYawAddress + 32, 4, out bytesRead));
 
-                    _cameraPitchSine = BitConverter.ToSingle(MemoryUtility.ReadMemory(_process[0], _cameraVerticalRotationAddress + 16, 4, out bytesRead));
+                    _cameraPitchSine = BitConverter.ToSingle(MemoryUtility.ReadMemory(_process[0], _cameraPitchAddress + 16, 4, out bytesRead));
 
 
                     if (_cameraHorizontalInput != 0 || _cameraForwardInput != 0 || _cameraVerticalInput != 0)
@@ -377,8 +379,8 @@ namespace SH_Camera
                     _cameraZ = BitConverter.ToSingle(MemoryUtility.ReadMemory(_process[0], _cameraCoordinateAddress + 4, 4, out bytesRead));
                     _cameraY = BitConverter.ToSingle(MemoryUtility.ReadMemory(_process[0], _cameraCoordinateAddress + 8, 4, out bytesRead));
 
-                    MemoryUtility.WriteMemory(_process[0], _cameraXMethodAddress, new byte[] { 0x90, 0x90, 0x90, 0x90, 0x90 }, out bytesWritten);
-                    MemoryUtility.WriteMemory(_process[0], _cameraYMethodAddress, new byte[] { 0x90, 0x90, 0x90, 0x90, 0x90 }, out bytesWritten);
+                    MemoryUtility.WriteMemory(_process[0], _cameraXAssemblyAddress, new byte[] { 0x90, 0x90, 0x90, 0x90, 0x90 }, out bytesWritten);
+                    MemoryUtility.WriteMemory(_process[0], _cameraYAssemblyAddress, new byte[] { 0x90, 0x90, 0x90, 0x90, 0x90 }, out bytesWritten);
 
                     _stopWatch.Reset();
                     _stopWatch.Start();
@@ -405,8 +407,8 @@ namespace SH_Camera
                     _cameraUp.ClearHotkeys();
                     _cameraDown.ClearHotkeys();
 
-                    MemoryUtility.WriteMemory(_process[0], _cameraXMethodAddress, new byte[] { 0x66, 0x0F, 0xD6, 0x42, 0x30 }, out bytesWritten);
-                    MemoryUtility.WriteMemory(_process[0], _cameraYMethodAddress, new byte[] { 0x66, 0x0F, 0xD6, 0x42, 0x38 }, out bytesWritten);
+                    MemoryUtility.WriteMemory(_process[0], _cameraXAssemblyAddress, new byte[] { 0x66, 0x0F, 0xD6, 0x42, 0x30 }, out bytesWritten);
+                    MemoryUtility.WriteMemory(_process[0], _cameraYAssemblyAddress, new byte[] { 0x66, 0x0F, 0xD6, 0x42, 0x38 }, out bytesWritten);
 
                     _stopWatch.Reset();
 
@@ -434,6 +436,16 @@ namespace SH_Camera
                 _running = false;
                 _guiThread.Join();
             }
+
+        }
+
+        private void Slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+
+            _cameraSpeed = (float)CameraSpeed_Slider.Value;
+
+            if(CameraSpeedValue_Label != null)
+                CameraSpeedValue_Label.Content = _cameraSpeed.ToString();
 
         }
 
