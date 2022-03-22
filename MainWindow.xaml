@@ -12,9 +12,8 @@
         <Label x:Name="CameraX_Label" Content="0" HorizontalAlignment="Left" Margin="10,20,0,0" VerticalAlignment="Top" Width="100" Height="30" FontWeight="Bold" FontSize="14" BorderThickness="2,2,2,2" Foreground="#FF960000"/>
         <Label x:Name="CameraY_Label" Content="0" HorizontalAlignment="Left" Margin="10,50,0,0" VerticalAlignment="Top" Width="100" Height="30" FontWeight="Bold" FontSize="14" BorderThickness="2,2,2,2" Foreground="#FF960000"/>
         <Label x:Name="CameraZ_Label" Content="0" HorizontalAlignment="Left" Margin="10,80,0,0" VerticalAlignment="Top" Width="100" Height="30" FontSize="14" FontWeight="Bold" BorderThickness="2,2,2,2" Foreground="#FF960000"/>
-        <Label x:Name="CameraHorizontalSine_Label" Content="0" HorizontalAlignment="Left" Margin="10,130,0,0" VerticalAlignment="Top" Width="100" Height="30" FontSize="14" FontWeight="Bold" BorderThickness="2,2,2,2" Foreground="#FF960000"/>
-        <Label x:Name="CameraHorizontalCosine_Label" Content="0" HorizontalAlignment="Left" Margin="10,160,0,0" VerticalAlignment="Top" Width="100" Height="30" FontSize="14" FontWeight="Bold" BorderThickness="2,2,2,2" Foreground="#FF960000"/>
-        <Label x:Name="CameraVerticalSine_Label" Content="0" HorizontalAlignment="Left" Margin="10,200,0,0" VerticalAlignment="Top" Width="100" Height="30" FontSize="14" FontWeight="Bold" BorderThickness="2,2,2,2" Foreground="#FF960000"/>
-        <Label x:Name="CameraVerticalCosine_Label" Content="0" HorizontalAlignment="Left" Margin="10,230,0,0" VerticalAlignment="Top" Width="100" Height="30" FontSize="14" FontWeight="Bold" BorderThickness="2,2,2,2" Foreground="#FF960000"/>
+        <Label x:Name="CameraYawSine_Label" Content="0" HorizontalAlignment="Left" Margin="10,130,0,0" VerticalAlignment="Top" Width="100" Height="30" FontSize="14" FontWeight="Bold" BorderThickness="2,2,2,2" Foreground="#FF960000"/>
+        <Label x:Name="CameraYawCosine_Label" Content="0" HorizontalAlignment="Left" Margin="10,160,0,0" VerticalAlignment="Top" Width="100" Height="30" FontSize="14" FontWeight="Bold" BorderThickness="2,2,2,2" Foreground="#FF960000"/>
+        <Label x:Name="CameraPitchSine_Label" Content="0" HorizontalAlignment="Left" Margin="10,200,0,0" VerticalAlignment="Top" Width="100" Height="30" FontSize="14" FontWeight="Bold" BorderThickness="2,2,2,2" Foreground="#FF960000"/>
     </Grid>
 </Window>

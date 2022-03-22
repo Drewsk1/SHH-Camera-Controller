@@ -35,7 +35,6 @@ namespace SH_Camera
         private float _cameraYawSine;
         private float _cameraYawCosine;
         private float _cameraPitchSine;
-        private float _cameraPitchCosine;
 
         private short _cameraHorizontalInput;
         private short _cameraForwardInput;
@@ -82,7 +81,6 @@ namespace SH_Camera
             _cameraYawSine = 0f;
             _cameraYawCosine = 0f;
             _cameraPitchSine = 0f;
-            _cameraPitchCosine = 0f;
 
             _cameraHorizontalInput = 0;
             _cameraForwardInput = 0;
@@ -120,11 +118,11 @@ namespace SH_Camera
                     CameraY_Label.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() => CameraY_Label.Content = _cameraY.ToString()));
                     CameraZ_Label.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() => CameraZ_Label.Content = _cameraZ.ToString()));
 
-                    CameraHorizontalSine_Label.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() => CameraHorizontalSine_Label.Content = _cameraYawSine.ToString()));
-                    CameraHorizontalCosine_Label.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() => CameraHorizontalCosine_Label.Content = _cameraYawCosine.ToString()));
+                    CameraYawSine_Label.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() => CameraYawSine_Label.Content = _cameraYawSine.ToString()));
+                    CameraYawCosine_Label.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() => CameraYawCosine_Label.Content = _cameraYawCosine.ToString()));
 
-                    CameraVerticalSine_Label.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() => CameraVerticalSine_Label.Content = _cameraPitchSine.ToString()));
-                    CameraVerticalCosine_Label.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() => CameraVerticalCosine_Label.Content = _cameraPitchCosine.ToString()));
+                    CameraPitchSine_Label.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() => CameraPitchSine_Label.Content = _cameraPitchSine.ToString()));
+
                 }
 
                 Thread.Sleep(500);
@@ -160,7 +158,6 @@ namespace SH_Camera
                     _cameraYawSine = BitConverter.ToSingle(MemoryUtility.ReadMemory(_process[0], _cameraHorizontalRotationAddress, 4, out bytesRead));
                     _cameraYawCosine = BitConverter.ToSingle(MemoryUtility.ReadMemory(_process[0], _cameraHorizontalRotationAddress + 32, 4, out bytesRead));
 
-                    _cameraPitchCosine = BitConverter.ToSingle(MemoryUtility.ReadMemory(_process[0], _cameraVerticalRotationAddress, 4, out bytesRead));
                     _cameraPitchSine = BitConverter.ToSingle(MemoryUtility.ReadMemory(_process[0], _cameraVerticalRotationAddress + 16, 4, out bytesRead));
 
 
