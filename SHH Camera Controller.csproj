@@ -6,7 +6,16 @@
     <RootNamespace>SHH_Camera_Controller</RootNamespace>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
+    <ApplicationIcon>234234.ico</ApplicationIcon>
+    <DebugType>embedded</DebugType>
+    <Authors>Drew Loeffler</Authors>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="234234.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 
   <ItemGroup>
     <Resource Include="234234.jpg">
