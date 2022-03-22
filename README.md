@@ -1,4 +1,4 @@
-# SH-Camera
+# SHH-Camera-Controller
 
 This program takes control of the camera in Silent Hill: Homecoming.
 
