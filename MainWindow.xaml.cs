@@ -236,7 +236,7 @@ namespace SHH_Camera_Controller
                     MemoryUtility.WriteMemory(_process[0], _cameraCoordinateAddress + 4, _cameraZ, out bytesWritten);
                     MemoryUtility.WriteMemory(_process[0], _cameraCoordinateAddress + 8, _cameraY, out bytesWritten);
 
-                    Thread.Sleep(16);
+                    Thread.Sleep(3);
 
                     _stopWatch.Stop();
 
