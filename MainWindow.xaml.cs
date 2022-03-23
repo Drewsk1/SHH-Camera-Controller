@@ -263,48 +263,65 @@ namespace SHH_Camera_Controller
 
             //toggle keys
 
-            if (hotKey.Key == Key.W)
+            switch (hotKey.Key)
             {
-                if (_cameraForwardInput != 1)
-                    _cameraForwardInput = 1;
-                else
-                    _cameraForwardInput = 0;
+
+                case Key.W:
+
+                    if (_cameraForwardInput != 1)
+                        _cameraForwardInput = 1;
+                    else
+                        _cameraForwardInput = 0;
+
+                    break;
+
+                case Key.S:
+
+                    if (_cameraForwardInput != -1)
+                        _cameraForwardInput = -1;
+                    else
+                        _cameraForwardInput = 0;
+
+                    break;
+
+                case Key.A:
+
+                    if (_cameraHorizontalInput != -1)
+                        _cameraHorizontalInput = -1;
+                    else
+                        _cameraHorizontalInput = 0;
+
+                    break;
+
+                case Key.D:
+
+                    if (_cameraHorizontalInput != 1)
+                        _cameraHorizontalInput = 1;
+                    else
+                        _cameraHorizontalInput = 0;
+
+                    break;
+
+                case Key.F:
+
+                    if (_cameraVerticalInput != 1)
+                        _cameraVerticalInput = 1;
+                    else
+                        _cameraVerticalInput = 0;
+
+                    break;
+
+                case Key.Space:
+
+                    if (_cameraVerticalInput != -1)
+                        _cameraVerticalInput = -1;
+                    else
+                        _cameraVerticalInput = 0;
+
+                    break;
+
             }
-            else if (hotKey.Key == Key.S)
-            {
-                if (_cameraForwardInput != -1)
-                    _cameraForwardInput = -1;
-                else
-                    _cameraForwardInput = 0;
-            }
-            else if (hotKey.Key == Key.D)
-            {
-                if (_cameraHorizontalInput != 1)
-                    _cameraHorizontalInput = 1;
-                else
-                    _cameraHorizontalInput = 0;
-            }
-            else if (hotKey.Key == Key.A)
-            {
-                if (_cameraHorizontalInput != -1)
-                    _cameraHorizontalInput = -1;
-                else
-                    _cameraHorizontalInput = 0;
-            }
-            else if (hotKey.Key == Key.F)
-            {
-                if (_cameraVerticalInput != 1)
-                    _cameraVerticalInput = 1;
-                else
-                    _cameraVerticalInput = 0;
-            }
-            else if (hotKey.Key == Key.Space)
-            {
-                if (_cameraVerticalInput != -1)
-                    _cameraVerticalInput = -1;
-                else
-                    _cameraVerticalInput = 0;
-            }
+
 
         }
 
