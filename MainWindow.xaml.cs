@@ -451,7 +451,6 @@ namespace SHH_Camera_Controller
 
                             InjectButton.IsEnabled = true;
                             AttachButton.IsEnabled = false;
-                            AMouse_CheckBox.IsEnabled = true;
 
                         }
 
@@ -534,8 +533,6 @@ namespace SHH_Camera_Controller
                         AMouse_CheckBox.IsChecked = false;
                         AMouse_CheckBox.IsEnabled = false;
 
-                        MouseS_Slider.IsEnabled = false;
-
                     }
 
                     _cameraForward.ClearHotkeys();
@@ -602,8 +599,6 @@ namespace SHH_Camera_Controller
 
             _mouseEnabled = true;
 
-            MouseS_Slider.IsEnabled = true;
-
             _mouseUp = new HotKey(Key.Up, ModifierKeys.None, new Action<HotKey>(OnHotKeyHandler), true);
             _mouseDown = new HotKey(Key.Down, ModifierKeys.None, new Action<HotKey>(OnHotKeyHandler), true);
             _mouseLeft = new HotKey(Key.Left, ModifierKeys.None, new Action<HotKey>(OnHotKeyHandler), true);
@@ -615,8 +610,6 @@ namespace SHH_Camera_Controller
         {
 
             _mouseEnabled = false;
-
-            MouseS_Slider.IsEnabled = false;
 
             _mouseUp.Dispose();
             _mouseDown.Dispose();

@@ -22,6 +22,6 @@
         <CheckBox x:Name="AMouse_CheckBox" Content="Arrow Key Mouse Movement" HorizontalAlignment="Left" Margin="440,215,0,0" VerticalAlignment="Top" IsEnabled="False" FontSize="16" Foreground="#FF960000" FontWeight="Bold" Checked="AMouse_CheckBox_Checked" Unchecked="AMouse_CheckBox_Unchecked"/>
         <Label x:Name="MouseS_Label" Content="Mouse Sensitivity:" HorizontalAlignment="Left" Margin="490,248,0,0" VerticalAlignment="Top" Foreground="#FF960000" FontSize="16" FontWeight="Bold"/>
         <Label x:Name="MouseSValue_Label" Content="10" HorizontalAlignment="Left" Margin="637,248,0,0" VerticalAlignment="Top" Foreground="#FF960000" FontSize="16" FontWeight="Bold"/>
-        <Slider x:Name="MouseS_Slider" HorizontalAlignment="Left" Margin="440,280,0,0" VerticalAlignment="Top" Width="340" IsEnabled="False" SmallChange="1" Minimum="1" LargeChange="5" Maximum="50" ValueChanged="MouseS_Slider_ValueChanged" Value="10"/>
+        <Slider x:Name="MouseS_Slider" HorizontalAlignment="Left" Margin="440,280,0,0" VerticalAlignment="Top" Width="340" SmallChange="1" Minimum="1" LargeChange="5" Maximum="50" ValueChanged="MouseS_Slider_ValueChanged" Value="10"/>
     </Grid>
 </Window>
