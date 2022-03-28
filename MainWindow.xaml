@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SHH_Camera_Controller"
         mc:Ignorable="d"
-        Title="SH Camera Controller" Height="500" Width="800" ResizeMode="NoResize" Icon="/234234.jpg" Closing="SHCWindow_Closing" MaxWidth="800" MaxHeight="500" MinWidth="800" MinHeight="500">
+        Title="SH Camera Controller" Height="500" Width="800" ResizeMode="NoResize" Icon="/HotS.ico" Closing="SHCWindow_Closing" MaxWidth="800" MaxHeight="500" MinWidth="800" MinHeight="500">
     <Grid HorizontalAlignment="Center" Width="800" Background="#FF333333" Height="500" VerticalAlignment="Top" MaxHeight="500" MaxWidth="800" MinWidth="800" MinHeight="500">
         <Button x:Name="AttachButton" Content="ATTACH" VerticalAlignment="Top" Width="340" Height="105" Click="AttachButton_Click" RenderTransformOrigin="0.502,0.537" HorizontalAlignment="Left" Margin="20,320,0,0" FontSize="36" FontWeight="Bold" Foreground="#FF960000" BorderBrush="#FF960000" Background="Black" BorderThickness="5,1,5,1" Grid.ColumnSpan="2"/>
         <Button x:Name="InjectButton" Content="INJECT" HorizontalAlignment="Right" Margin="0,320,20,0" VerticalAlignment="Top" Width="340" Height="105" RenderTransformOrigin="0.5,0.563" FontSize="36" FontWeight="Bold" Foreground="#FF960000" Click="InjectButton_Click" BorderBrush="#FF960000" Background="Black" BorderThickness="5,1,5,1" Grid.Column="1"/>
