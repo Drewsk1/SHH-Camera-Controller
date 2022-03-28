@@ -21,9 +21,13 @@ namespace SHH_Camera_Controller
         private HotKey _cameraForward;
         private HotKey _cameraBackward;
         private HotKey _cameraLeft;
-        private HotKey _cameraRight;    
+        private HotKey _cameraRight;
         private HotKey _cameraUp;
         private HotKey _cameraDown;
+        private HotKey _mouseLeft;
+        private HotKey _mouseRight;
+        private HotKey _mouseUp;
+        private HotKey _mouseDown;
 
         private float _cameraSpeed;
         private float _cameraX;
@@ -40,10 +44,21 @@ namespace SHH_Camera_Controller
         private short _cameraForwardInput;
         private short _cameraVerticalInput;
 
+        private short _mouseVerticalInput;
+        private short _mouseHorizontalInput;
+
+        private int _mouseSensitivity;
+
+        private bool _mouseEnabled;
+
         private bool _isAttached;
         private bool _isInjected;
 
         private bool _running;
+
+        private bool _error;
+
+        private double _errorOpacity;
 
         private Process[] _process;
         private ProcessModule _procMod;
@@ -86,32 +101,41 @@ namespace SHH_Camera_Controller
             _cameraForwardInput = 0;
             _cameraVerticalInput = 0;
 
+            _mouseHorizontalInput = 0;
+            _mouseVerticalInput = 0;
+
+            _mouseSensitivity = 10;
+
+            _mouseEnabled = false;
+
             _stopWatch = new Stopwatch();
 
             _isAttached = false;
             _isInjected = false;
 
+            _error = false;
+
+            _errorOpacity = 0d;
+
             AttachButton.IsEnabled = true;
             InjectButton.IsEnabled = false;
-
-            CameraSpeed_Slider.IsEnabled = true;
 
             _running = true;
 
             _guiThread = new Thread(new ThreadStart(GUIThread));
             _guiThread.Start();
-            while(!_guiThread.IsAlive) ;
+            while (!_guiThread.IsAlive) ;
 
             _injectThread = new Thread(new ThreadStart(InjectThread));
             _injectThread.Start();
-            while(!_injectThread.IsAlive) ;
+            while (!_injectThread.IsAlive) ;
 
         }
-        
+
         private void GUIThread()
         {
 
-            while(_running)
+            while (_running)
             {
                 if (_isAttached)
                 {
@@ -125,6 +149,22 @@ namespace SHH_Camera_Controller
 
                     CameraPitchSine_Label.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() => CameraPitchSine_Label.Content = _cameraPitchSine.ToString()));
 
+                }
+
+                if (_error)
+                {
+                    if (_errorOpacity > 0d)
+                    {
+
+                        _errorOpacity -= 0.1d;
+
+                        ErrorMessage_Label.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() => ErrorMessage_Label.Opacity = _errorOpacity));
+
+                    }
+                    else
+                    {
+                        _error = false;
+                    }
                 }
 
                 Thread.Sleep(500);
@@ -143,12 +183,12 @@ namespace SHH_Camera_Controller
             //double hAngleX;
             //double vAngle;
 
-            while(_running)
+            while (_running)
             {
 
                 if (_isInjected)
                 {
-                    
+
                     //_cameraX = BitConverter.ToSingle(MemoryUtility.ReadMemory(_process[0], _cameraCoordinateAddress, 4, out bytesRead));
                     //_cameraZ = BitConverter.ToSingle(MemoryUtility.ReadMemory(_process[0], _cameraCoordinateAddress + 4, 4, out bytesRead));
                     //_cameraY = BitConverter.ToSingle(MemoryUtility.ReadMemory(_process[0], _cameraCoordinateAddress + 8, 4, out bytesRead));
@@ -167,7 +207,7 @@ namespace SHH_Camera_Controller
 
                         if (_cameraForwardInput != 0)
                         {
-                            
+
 
                             //Wrong but saving for later projects
                             //Debug.WriteLine("Forward");
@@ -206,7 +246,7 @@ namespace SHH_Camera_Controller
                             //}
 
                             //zSpeed = (float)(vAngle / 90d);
-                            
+
 
                             _cameraY += ((_cameraYawSine * _cameraSpeed) * _deltaTime) * (float)_cameraForwardInput;
                             _cameraX += ((_cameraYawCosine * _cameraSpeed) * _deltaTime) * (float)_cameraForwardInput;
@@ -224,9 +264,20 @@ namespace SHH_Camera_Controller
                         if (_cameraVerticalInput != 0)
                         {
 
-                            _cameraZ += ((float)_cameraVerticalInput * (_cameraSpeed/2)) * _deltaTime;
+                            _cameraZ += ((float)_cameraVerticalInput * (_cameraSpeed / 2)) * _deltaTime;
 
                         }
+
+                    }
+
+                    if (_mouseEnabled)
+                    {
+
+                        if (_mouseHorizontalInput != 0)
+                            MouseUtility.MoveMouseRelative(_mouseHorizontalInput * _mouseSensitivity, 0);
+
+                        if (_mouseVerticalInput != 0)
+                            MouseUtility.MoveMouseRelative(0, _mouseVerticalInput * _mouseSensitivity);
 
                     }
 
@@ -244,15 +295,13 @@ namespace SHH_Camera_Controller
 
                     _deltaTime = (float)_stopWatchInterval.Milliseconds / 100f;
 
-                    //Debug.WriteLine(_stopWatchInterval.Milliseconds.ToString());
-
                     _stopWatch.Restart();
-                    
+
                 }
                 else
                 {
                     Thread.Sleep(500);
-                }   
+                }
 
             }
 
@@ -319,9 +368,54 @@ namespace SHH_Camera_Controller
                         _cameraVerticalInput = 0;
 
                     break;
+                case Key.Up:
+
+                    if(_mouseVerticalInput != -1)
+                        _mouseVerticalInput = -1;
+                    else
+                        _mouseVerticalInput= 0;
+
+                    break;
+                case Key.Down:
+
+                    if (_mouseVerticalInput != 1)
+                        _mouseVerticalInput = 1;
+                    else
+                        _mouseVerticalInput = 0;
+
+                    break;
+                case Key.Left:
+
+                    if (_mouseHorizontalInput != -1)
+                        _mouseHorizontalInput = -1;
+                    else
+                        _mouseHorizontalInput = 0;
+
+                    break;
+                case Key.Right:
+
+                    if (_mouseHorizontalInput != 1)
+                        _mouseHorizontalInput = 1;
+                    else
+                        _mouseHorizontalInput = 0;
+
+                    break;
 
             }
 
+
+        }
+
+        private void ErrorMessage(string message)
+        {
+
+            ErrorMessage_Label.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() => ErrorMessage_Label.Content = message));
+
+            _errorOpacity = 1d;
+
+            ErrorMessage_Label.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() => ErrorMessage_Label.Opacity = _errorOpacity));
+
+            _error = true;
 
         }
 
@@ -340,11 +434,11 @@ namespace SHH_Camera_Controller
 
                     _process = Process.GetProcessesByName("SilentHill");
 
-                    foreach(ProcessModule processMod in _process[0].Modules)
+                    foreach (ProcessModule processMod in _process[0].Modules)
                     {
                         Debug.WriteLine(processMod.ModuleName);
 
-                        if(processMod.ModuleName == "SilentHill.exe")
+                        if (processMod.ModuleName == "SilentHill.exe")
                         {
 
                             _cameraX = BitConverter.ToSingle(MemoryUtility.ReadMemory(_process[0], _cameraCoordinateAddress, 4, out bytesRead));
@@ -357,6 +451,7 @@ namespace SHH_Camera_Controller
 
                             InjectButton.IsEnabled = true;
                             AttachButton.IsEnabled = false;
+                            AMouse_CheckBox.IsEnabled = true;
 
                         }
 
@@ -367,6 +462,8 @@ namespace SHH_Camera_Controller
                 {
 
                     Debug.WriteLine("Process Not Found");
+
+                    ErrorMessage("Process Not Found");
 
                 }
 
@@ -406,6 +503,8 @@ namespace SHH_Camera_Controller
 
                     InjectButton.Content = "UNINJECT";
 
+                    AMouse_CheckBox.IsEnabled = true;
+
                 }
                 else if (_isInjected)
                 {
@@ -413,9 +512,31 @@ namespace SHH_Camera_Controller
                     _cameraForward.Dispose();
                     _cameraBackward.Dispose();
                     _cameraLeft.Dispose();
-                    _cameraRight.Dispose(); 
+                    _cameraRight.Dispose();
                     _cameraUp.Dispose();
                     _cameraDown.Dispose();
+
+                    if (_mouseEnabled)
+                    {
+
+                        _mouseUp.Dispose();
+                        _mouseDown.Dispose();
+                        _mouseLeft.Dispose();
+                        _mouseRight.Dispose();
+
+                        _mouseUp.ClearHotkeys();
+                        _mouseDown.ClearHotkeys();
+                        _mouseLeft.ClearHotkeys();
+                        _mouseRight.ClearHotkeys();
+
+                        _mouseEnabled = false;
+
+                        AMouse_CheckBox.IsChecked = false;
+                        AMouse_CheckBox.IsEnabled = false;
+
+                        MouseS_Slider.IsEnabled = false;
+
+                    }
 
                     _cameraForward.ClearHotkeys();
                     _cameraBackward.ClearHotkeys();
@@ -456,13 +577,56 @@ namespace SHH_Camera_Controller
 
         }
 
-        private void Slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        private void CameraSpeed_Slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
 
             _cameraSpeed = (float)CameraSpeed_Slider.Value;
 
-            if(CameraSpeedValue_Label != null)
+            if (CameraSpeedValue_Label != null)
                 CameraSpeedValue_Label.Content = _cameraSpeed.ToString();
+
+        }
+
+        private void MouseS_Slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+
+            _mouseSensitivity = (int)MouseS_Slider.Value;
+
+            if(MouseSValue_Label != null)
+                MouseSValue_Label.Content = _mouseSensitivity.ToString();
+
+        }
+
+        private void AMouse_CheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+
+            _mouseEnabled = true;
+
+            MouseS_Slider.IsEnabled = true;
+
+            _mouseUp = new HotKey(Key.Up, ModifierKeys.None, new Action<HotKey>(OnHotKeyHandler), true);
+            _mouseDown = new HotKey(Key.Down, ModifierKeys.None, new Action<HotKey>(OnHotKeyHandler), true);
+            _mouseLeft = new HotKey(Key.Left, ModifierKeys.None, new Action<HotKey>(OnHotKeyHandler), true);
+            _mouseRight = new HotKey(Key.Right, ModifierKeys.None, new Action<HotKey>(OnHotKeyHandler), true);
+
+        }
+
+        private void AMouse_CheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+
+            _mouseEnabled = false;
+
+            MouseS_Slider.IsEnabled = false;
+
+            _mouseUp.Dispose();
+            _mouseDown.Dispose();
+            _mouseLeft.Dispose();
+            _mouseRight.Dispose();
+
+            _mouseUp.ClearHotkeys();
+            _mouseDown.ClearHotkeys();
+            _mouseLeft.ClearHotkeys();
+            _mouseRight.ClearHotkeys();
 
         }
 
