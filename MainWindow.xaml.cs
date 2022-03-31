@@ -5,13 +5,14 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
+using System.Windows.Media;
 
 namespace SHH_Camera_Controller
 {
     public partial class MainWindow : Window
     {
 
-        #region fields
+        #region Fields
 
         private const float Radians2Degrees = 57.29578f;
 
@@ -28,13 +29,12 @@ namespace SHH_Camera_Controller
         private HotKey _mouseRight;
         private HotKey _mouseUp;
         private HotKey _mouseDown;
+        private HotKey _screenRecord;
 
         private float _cameraSpeed;
         private float _cameraX;
         private float _cameraY;
         private float _cameraZ;
-
-        private float _deltaTime;
 
         private float _cameraYawSine;
         private float _cameraYawCosine;
@@ -49,10 +49,14 @@ namespace SHH_Camera_Controller
 
         private int _mouseSensitivity;
 
+        private float _lastValue;
+
         private bool _mouseEnabled;
+        private bool _recordEnabled;
 
         private bool _isAttached;
         private bool _isInjected;
+        private bool _isRecording;
 
         private bool _running;
 
@@ -66,11 +70,11 @@ namespace SHH_Camera_Controller
         private IntPtr _cameraCoordinateAddress;
         private IntPtr _cameraYawAddress;
         private IntPtr _cameraPitchAddress;
+
+        private IntPtr _cameraNewXAddress;
+
         private IntPtr _cameraXAssemblyAddress;
         private IntPtr _cameraYAssemblyAddress;
-
-        private Stopwatch _stopWatch;
-        private TimeSpan _stopWatchInterval;
 
         #endregion
 
@@ -82,16 +86,15 @@ namespace SHH_Camera_Controller
             _cameraCoordinateAddress = (IntPtr)0x1158F1C0;
             _cameraYawAddress = (IntPtr)0x1158F190;
             _cameraPitchAddress = (IntPtr)0x1158F1A4;
-            _cameraXAssemblyAddress = (IntPtr)0x1053CC8A; // 66 0F D6 42 30 //90 90 90 90 90
-            _cameraYAssemblyAddress = (IntPtr)0x1053CC94; // 66 0F D6 42 38 //90 90 90 90 90
+            _cameraXAssemblyAddress = (IntPtr)0x1053CC8A; // 66 0F D6 42 30 // 66 0F D6 42 F8 // send x to unused address
+            _cameraYAssemblyAddress = (IntPtr)0x1053CC94; // 66 0F D6 42 38 // 90 90 90 90 90
+            _cameraNewXAddress = (IntPtr)0x1053CC8A;
 
             _cameraSpeed = 5f;
 
             _cameraX = 0f;
             _cameraY = 0f;
             _cameraZ = 0f;
-
-            _deltaTime = 0f;
 
             _cameraYawSine = 0f;
             _cameraYawCosine = 0f;
@@ -104,14 +107,16 @@ namespace SHH_Camera_Controller
             _mouseHorizontalInput = 0;
             _mouseVerticalInput = 0;
 
+            _lastValue = 0f;
+
             _mouseSensitivity = 10;
 
             _mouseEnabled = false;
-
-            _stopWatch = new Stopwatch();
+            _recordEnabled = false;
 
             _isAttached = false;
             _isInjected = false;
+            _isRecording = false;
 
             _error = false;
 
@@ -125,10 +130,6 @@ namespace SHH_Camera_Controller
             _guiThread = new Thread(new ThreadStart(GUIThread));
             _guiThread.Start();
             while (!_guiThread.IsAlive) ;
-
-            _injectThread = new Thread(new ThreadStart(InjectThread));
-            _injectThread.Start();
-            while (!_injectThread.IsAlive) ;
 
         }
 
@@ -179,129 +180,92 @@ namespace SHH_Camera_Controller
             int bytesRead;
             int bytesWritten;
 
-            //double hAngleY;
-            //double hAngleX;
-            //double vAngle;
-
             while (_running)
             {
 
-                if (_isInjected)
+                if (_recordEnabled || _isInjected)
                 {
 
-                    //_cameraX = BitConverter.ToSingle(MemoryUtility.ReadMemory(_process[0], _cameraCoordinateAddress, 4, out bytesRead));
-                    //_cameraZ = BitConverter.ToSingle(MemoryUtility.ReadMemory(_process[0], _cameraCoordinateAddress + 4, 4, out bytesRead));
-                    //_cameraY = BitConverter.ToSingle(MemoryUtility.ReadMemory(_process[0], _cameraCoordinateAddress + 8, 4, out bytesRead));
+                    float newValue = BitConverter.ToSingle(MemoryUtility.ReadMemory(_process[0], _cameraNewXAddress, 4, out bytesRead));
 
-                    _cameraYawSine = BitConverter.ToSingle(MemoryUtility.ReadMemory(_process[0], _cameraYawAddress, 4, out bytesRead));
-                    _cameraYawCosine = BitConverter.ToSingle(MemoryUtility.ReadMemory(_process[0], _cameraYawAddress + 32, 4, out bytesRead));
-
-                    _cameraPitchSine = BitConverter.ToSingle(MemoryUtility.ReadMemory(_process[0], _cameraPitchAddress + 16, 4, out bytesRead));
-
-
-                    if (_cameraHorizontalInput != 0 || _cameraForwardInput != 0 || _cameraVerticalInput != 0)
+                    if (_lastValue != newValue)
                     {
 
-                        //hAngleY = hAngleX = Math.Atan2((double)_cameraHorizontalSine, (double)_cameraHorizontalCosine) * Radians2Degrees;
-                        //vAngle = Math.Atan2((double)_cameraVerticalSine, (double)_cameraVerticalCosine) * Radians2Degrees;
+                        MemoryUtility.WriteMemory(_process[0], _cameraNewXAddress, 99999f, out bytesWritten);
 
-                        if (_cameraForwardInput != 0)
+
+                        if (_recordEnabled)
                         {
 
 
-                            //Wrong but saving for later projects
-                            //Debug.WriteLine("Forward");
-
-                            //if(hAngleY > 90d)
-                            //{
-                            //    hAngleY = 180d - hAngleY;
-                            //}
-                            //else if(hAngleY < -90d)
-                            //{
-                            //    hAngleY = -180d - hAngleY;
-                            //}
-
-                            //ySpeed = (float)(hAngleY / 90d);
-
-
-                            //if(hAngleX >= 0d)
-                            //{
-                            //    hAngleX = 90d - hAngleX;
-                            //}
-                            //else if(hAngleX < 0d)
-                            //{
-                            //    hAngleX = 90d - (-hAngleX);
-                            //}
-
-                            //xSpeed = (float)(hAngleX / 90d);
-
-
-                            //if(vAngle > 90d)
-                            //{
-                            //    vAngle = 180d - vAngle;
-                            //}
-                            //else if(vAngle < -90d)
-                            //{
-                            //    vAngle = -180d - vAngle;
-                            //}
-
-                            //zSpeed = (float)(vAngle / 90d);
-
-
-                            _cameraY += ((_cameraYawSine * _cameraSpeed) * _deltaTime) * (float)_cameraForwardInput;
-                            _cameraX += ((_cameraYawCosine * _cameraSpeed) * _deltaTime) * (float)_cameraForwardInput;
-                            _cameraZ += ((_cameraPitchSine * _cameraSpeed) * _deltaTime) * (float)_cameraForwardInput;
 
                         }
-                        else if (_cameraHorizontalInput != 0)
+
+                        if (_isInjected)
                         {
 
-                            _cameraX += ((_cameraYawSine * _cameraSpeed) * _deltaTime) * (float)_cameraHorizontalInput;
-                            _cameraY += ((-_cameraYawCosine * _cameraSpeed) * _deltaTime) * (float)_cameraHorizontalInput;
+                            _cameraYawSine = BitConverter.ToSingle(MemoryUtility.ReadMemory(_process[0], _cameraYawAddress, 4, out bytesRead));
+                            _cameraYawCosine = BitConverter.ToSingle(MemoryUtility.ReadMemory(_process[0], _cameraYawAddress + 32, 4, out bytesRead));
+
+                            _cameraPitchSine = BitConverter.ToSingle(MemoryUtility.ReadMemory(_process[0], _cameraPitchAddress + 16, 4, out bytesRead));
+
+
+                            if (_cameraHorizontalInput != 0 || _cameraForwardInput != 0 || _cameraVerticalInput != 0)
+                            {
+
+                                if (_cameraForwardInput != 0)
+                                {
+
+                                    _cameraY += (_cameraYawSine * _cameraSpeed) * (float)_cameraForwardInput;
+                                    _cameraX += (_cameraYawCosine * _cameraSpeed) * (float)_cameraForwardInput;
+                                    _cameraZ += (_cameraPitchSine * _cameraSpeed) * (float)_cameraForwardInput;
+
+                                }
+                                else if (_cameraHorizontalInput != 0)
+                                {
+
+                                    _cameraX += (_cameraYawSine * _cameraSpeed) * (float)_cameraHorizontalInput;
+                                    _cameraY += (-_cameraYawCosine * _cameraSpeed) * (float)_cameraHorizontalInput;
+
+                                }
+
+                                if (_cameraVerticalInput != 0)
+                                {
+
+                                    _cameraZ += (float)_cameraVerticalInput * _cameraSpeed;
+
+                                }
+
+                            }
+
+                            if (_mouseEnabled)
+                            {
+
+                                if (_mouseHorizontalInput != 0)
+                                    MouseUtility.MoveMouseRelative(_mouseHorizontalInput * _mouseSensitivity, 0);
+
+                                if (_mouseVerticalInput != 0)
+                                    MouseUtility.MoveMouseRelative(0, _mouseVerticalInput * _mouseSensitivity);
+
+                            }
+
+                            //Debug.WriteLine(_cameraX.ToString() + " , " + _cameraY.ToString() + " , " + _cameraZ.ToString());
+
+                            MemoryUtility.WriteMemory(_process[0], _cameraCoordinateAddress, _cameraX, out bytesWritten);
+                            MemoryUtility.WriteMemory(_process[0], _cameraCoordinateAddress + 4, _cameraZ, out bytesWritten);
+                            MemoryUtility.WriteMemory(_process[0], _cameraCoordinateAddress + 8, _cameraY, out bytesWritten);
 
                         }
 
-                        if (_cameraVerticalInput != 0)
-                        {
-
-                            _cameraZ += ((float)_cameraVerticalInput * (_cameraSpeed / 2)) * _deltaTime;
-
-                        }
 
                     }
-
-                    if (_mouseEnabled)
-                    {
-
-                        if (_mouseHorizontalInput != 0)
-                            MouseUtility.MoveMouseRelative(_mouseHorizontalInput * _mouseSensitivity, 0);
-
-                        if (_mouseVerticalInput != 0)
-                            MouseUtility.MoveMouseRelative(0, _mouseVerticalInput * _mouseSensitivity);
-
-                    }
-
-                    //Debug.WriteLine(_cameraX.ToString() + " , " + _cameraY.ToString() + " , " + _cameraZ.ToString());
-
-                    MemoryUtility.WriteMemory(_process[0], _cameraCoordinateAddress, _cameraX, out bytesWritten);
-                    MemoryUtility.WriteMemory(_process[0], _cameraCoordinateAddress + 4, _cameraZ, out bytesWritten);
-                    MemoryUtility.WriteMemory(_process[0], _cameraCoordinateAddress + 8, _cameraY, out bytesWritten);
-
-                    Thread.Sleep(3);
-
-                    _stopWatch.Stop();
-
-                    _stopWatchInterval = _stopWatch.Elapsed;
-
-                    _deltaTime = (float)_stopWatchInterval.Milliseconds / 100f;
-
-                    _stopWatch.Restart();
+                    
+                    Thread.Sleep(1);
 
                 }
                 else
-                {
                     Thread.Sleep(500);
-                }
+
 
             }
 
@@ -400,6 +364,16 @@ namespace SHH_Camera_Controller
                         _mouseHorizontalInput = 0;
 
                     break;
+                case Key.R:
+
+                    _isRecording = !_isRecording;
+
+                    if (_isRecording) 
+                        RecordIndicator.Fill = Brushes.Red;
+                    else
+                        RecordIndicator.Fill = Brushes.Black;
+
+                    break;
 
             }
 
@@ -451,6 +425,11 @@ namespace SHH_Camera_Controller
 
                             InjectButton.IsEnabled = true;
                             AttachButton.IsEnabled = false;
+                            ScreenRec_CheckBox.IsEnabled = true;
+
+                            _injectThread = new Thread(new ThreadStart(InjectThread));
+                            _injectThread.Start();
+                            while (!_injectThread.IsAlive) ;
 
                         }
 
@@ -492,11 +471,10 @@ namespace SHH_Camera_Controller
                     _cameraZ = BitConverter.ToSingle(MemoryUtility.ReadMemory(_process[0], _cameraCoordinateAddress + 4, 4, out bytesRead));
                     _cameraY = BitConverter.ToSingle(MemoryUtility.ReadMemory(_process[0], _cameraCoordinateAddress + 8, 4, out bytesRead));
 
-                    MemoryUtility.WriteMemory(_process[0], _cameraXAssemblyAddress, new byte[] { 0x90, 0x90, 0x90, 0x90, 0x90 }, out bytesWritten);
-                    MemoryUtility.WriteMemory(_process[0], _cameraYAssemblyAddress, new byte[] { 0x90, 0x90, 0x90, 0x90, 0x90 }, out bytesWritten);
+                    if(!_recordEnabled)
+                        MemoryUtility.WriteMemory(_process[0], _cameraXAssemblyAddress, new byte[] { 0x66, 0x0F, 0xD6, 0x42, 0xF8 }, out bytesWritten);
 
-                    _stopWatch.Reset();
-                    _stopWatch.Start();
+                    MemoryUtility.WriteMemory(_process[0], _cameraYAssemblyAddress, new byte[] { 0x90, 0x90, 0x90, 0x90, 0x90 }, out bytesWritten);
 
                     _isInjected = true;
 
@@ -542,14 +520,16 @@ namespace SHH_Camera_Controller
                     _cameraUp.ClearHotkeys();
                     _cameraDown.ClearHotkeys();
 
-                    MemoryUtility.WriteMemory(_process[0], _cameraXAssemblyAddress, new byte[] { 0x66, 0x0F, 0xD6, 0x42, 0x30 }, out bytesWritten);
-                    MemoryUtility.WriteMemory(_process[0], _cameraYAssemblyAddress, new byte[] { 0x66, 0x0F, 0xD6, 0x42, 0x38 }, out bytesWritten);
+                    if(!_recordEnabled)
+                        MemoryUtility.WriteMemory(_process[0], _cameraXAssemblyAddress, new byte[] { 0x66, 0x0F, 0xD6, 0x42, 0x30 }, out bytesWritten);
 
-                    _stopWatch.Reset();
+                    MemoryUtility.WriteMemory(_process[0], _cameraYAssemblyAddress, new byte[] { 0x66, 0x0F, 0xD6, 0x42, 0x38 }, out bytesWritten);
 
                     _isInjected = false;
 
                     InjectButton.Content = "INJECT";
+
+                    Thread.Sleep(2000);
 
                 }
 
@@ -566,11 +546,12 @@ namespace SHH_Camera_Controller
                 _guiThread.Join();
             }
 
-            if (_injectThread.IsAlive)
-            {
-                _running = false;
-                _guiThread.Join();
-            }
+            if(_injectThread != null)
+                if (_injectThread.IsAlive)
+                {
+                    _running = false;
+                    _guiThread.Join();
+                }
 
         }
 
@@ -620,6 +601,39 @@ namespace SHH_Camera_Controller
             _mouseDown.ClearHotkeys();
             _mouseLeft.ClearHotkeys();
             _mouseRight.ClearHotkeys();
+
+        }
+
+        private void ScreenRec_CheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+
+            _recordEnabled = true;
+
+            _screenRecord = new HotKey(Key.R, ModifierKeys.None, new Action<HotKey>(OnHotKeyHandler), true);
+
+            int bytesWritten;
+
+            MemoryUtility.WriteMemory(_process[0], _cameraXAssemblyAddress, new byte[] { 0x66, 0x0F, 0xD6, 0x42, 0xF8 }, out bytesWritten);
+
+        }
+
+        private void ScreenRec_CheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+
+            _recordEnabled = false;
+            _isRecording = false;
+
+            RecordIndicator.Fill = Brushes.Black;
+
+            int bytesWritten;
+
+            if(!_isInjected)
+                MemoryUtility.WriteMemory(_process[0], _cameraXAssemblyAddress, new byte[] { 0x66, 0x0F, 0xD6, 0x42, 0x30 }, out bytesWritten);
+
+            _screenRecord.Dispose();
+            _screenRecord.ClearHotkeys();
+
+            Thread.Sleep(2000);
 
         }
 

@@ -19,9 +19,11 @@
         <Label x:Name="CameraSpeed_Label" Content="Camera Speed:" HorizontalAlignment="Left" Margin="57,248,0,0" VerticalAlignment="Top" Foreground="#FF960000" FontSize="16" FontWeight="Bold"/>
         <Label x:Name="CameraSpeedValue_Label" Content="5" HorizontalAlignment="Left" Margin="178,248,0,0" VerticalAlignment="Top" Foreground="#FF960000" FontSize="16" FontWeight="Bold"/>
         <Label x:Name="ErrorMessage_Label" Content="" HorizontalAlignment="Left" Margin="20,430,0,0" VerticalAlignment="Top" Foreground="#FF960000" FontSize="18" Width="770" FontWeight="Bold" Opacity="0"/>
-        <CheckBox x:Name="AMouse_CheckBox" Content="Arrow Key Mouse Movement" HorizontalAlignment="Left" Margin="440,215,0,0" VerticalAlignment="Top" IsEnabled="False" FontSize="16" Foreground="#FF960000" FontWeight="Bold" Checked="AMouse_CheckBox_Checked" Unchecked="AMouse_CheckBox_Unchecked"/>
+        <CheckBox x:Name="AMouse_CheckBox" Content="Arrow Key Mouse Movement" HorizontalAlignment="Left" Margin="440,215,0,0" VerticalAlignment="Top" FontSize="16" Foreground="#FF960000" FontWeight="Bold" Checked="AMouse_CheckBox_Checked" Unchecked="AMouse_CheckBox_Unchecked" IsEnabled="False"/>
         <Label x:Name="MouseS_Label" Content="Mouse Sensitivity:" HorizontalAlignment="Left" Margin="490,248,0,0" VerticalAlignment="Top" Foreground="#FF960000" FontSize="16" FontWeight="Bold"/>
         <Label x:Name="MouseSValue_Label" Content="10" HorizontalAlignment="Left" Margin="637,248,0,0" VerticalAlignment="Top" Foreground="#FF960000" FontSize="16" FontWeight="Bold"/>
         <Slider x:Name="MouseS_Slider" HorizontalAlignment="Left" Margin="440,280,0,0" VerticalAlignment="Top" Width="340" SmallChange="1" Minimum="1" LargeChange="5" Maximum="50" ValueChanged="MouseS_Slider_ValueChanged" Value="10"/>
+        <CheckBox x:Name="ScreenRec_CheckBox" Content="Screen Record" HorizontalAlignment="Left" Margin="440,172,0,0" VerticalAlignment="Top" FontSize="16" FontWeight="Bold" Foreground="#FF960000" Checked="ScreenRec_CheckBox_Checked" Unchecked="ScreenRec_CheckBox_Unchecked" IsEnabled="False"/>
+        <Ellipse x:Name="RecordIndicator" HorizontalAlignment="Left" Height="56" Margin="735,10,0,0" Stroke="#FFD6D6D6" VerticalAlignment="Top" Width="55" Fill="Black"/>
     </Grid>
 </Window>
