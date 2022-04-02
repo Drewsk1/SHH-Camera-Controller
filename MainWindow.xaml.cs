@@ -251,7 +251,7 @@ namespace SHH_Camera_Controller
                             if (_isRecording)
                             {
 
-                                Thread.Sleep(50); //Gives game enough time to draw frame will look choppy in-game but smooth in video. Set higher if game lags a lot when playing.
+                                Thread.Sleep(50); //Gives game enough time to draw frame will look choppy in-game but smooth in video.
 
                                 _screenRecorder.CaptureFrame();
 

@@ -14,12 +14,8 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <Optimize>False</Optimize>
+    <Optimize>True</Optimize>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Page Remove="App.xaml" />
-  </ItemGroup>
 
   <ItemGroup>
     <Content Include="HotS.ico">
