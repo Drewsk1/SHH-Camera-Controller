@@ -18,10 +18,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="App.xaml.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Page Remove="App.xaml" />
   </ItemGroup>
 
