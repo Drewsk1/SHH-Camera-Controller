@@ -19,6 +19,9 @@ namespace SHH_Camera_Controller
         private Thread? _guiThread;
         private Thread? _injectThread;
 
+        private int _recIndex;
+        private ScreenRecorder _screenRecorder;
+
         private HotKey _cameraForward;
         private HotKey _cameraBackward;
         private HotKey _cameraLeft;
@@ -48,8 +51,6 @@ namespace SHH_Camera_Controller
         private short _mouseHorizontalInput;
 
         private int _mouseSensitivity;
-
-        private float _lastValue;
 
         private bool _mouseEnabled;
         private bool _recordEnabled;
@@ -86,11 +87,14 @@ namespace SHH_Camera_Controller
             _cameraCoordinateAddress = (IntPtr)0x1158F1C0;
             _cameraYawAddress = (IntPtr)0x1158F190;
             _cameraPitchAddress = (IntPtr)0x1158F1A4;
+            _cameraNewXAddress = (IntPtr)0x1158F188;
+
             _cameraXAssemblyAddress = (IntPtr)0x1053CC8A; // 66 0F D6 42 30 // 66 0F D6 42 F8 // send x to unused address
             _cameraYAssemblyAddress = (IntPtr)0x1053CC94; // 66 0F D6 42 38 // 90 90 90 90 90
-            _cameraNewXAddress = (IntPtr)0x1053CC8A;
 
-            _cameraSpeed = 5f;
+            _recIndex = 0;
+
+            _cameraSpeed = 0.5f;
 
             _cameraX = 0f;
             _cameraY = 0f;
@@ -106,8 +110,6 @@ namespace SHH_Camera_Controller
 
             _mouseHorizontalInput = 0;
             _mouseVerticalInput = 0;
-
-            _lastValue = 0f;
 
             _mouseSensitivity = 10;
 
@@ -183,35 +185,28 @@ namespace SHH_Camera_Controller
             while (_running)
             {
 
-                if (_recordEnabled || _isInjected)
+                if (_isInjected)
                 {
 
                     float newValue = BitConverter.ToSingle(MemoryUtility.ReadMemory(_process[0], _cameraNewXAddress, 4, out bytesRead));
 
-                    if (_lastValue != newValue)
+                    if (newValue != 99999f)
                     {
 
                         MemoryUtility.WriteMemory(_process[0], _cameraNewXAddress, 99999f, out bytesWritten);
 
 
-                        if (_recordEnabled)
-                        {
-
-
-
-                        }
-
                         if (_isInjected)
                         {
 
-                            _cameraYawSine = BitConverter.ToSingle(MemoryUtility.ReadMemory(_process[0], _cameraYawAddress, 4, out bytesRead));
-                            _cameraYawCosine = BitConverter.ToSingle(MemoryUtility.ReadMemory(_process[0], _cameraYawAddress + 32, 4, out bytesRead));
-
-                            _cameraPitchSine = BitConverter.ToSingle(MemoryUtility.ReadMemory(_process[0], _cameraPitchAddress + 16, 4, out bytesRead));
-
-
                             if (_cameraHorizontalInput != 0 || _cameraForwardInput != 0 || _cameraVerticalInput != 0)
                             {
+
+                                _cameraYawSine = BitConverter.ToSingle(MemoryUtility.ReadMemory(_process[0], _cameraYawAddress, 4, out bytesRead));
+                                _cameraYawCosine = BitConverter.ToSingle(MemoryUtility.ReadMemory(_process[0], _cameraYawAddress + 32, 4, out bytesRead));
+
+                                _cameraPitchSine = BitConverter.ToSingle(MemoryUtility.ReadMemory(_process[0], _cameraPitchAddress + 16, 4, out bytesRead));
+
 
                                 if (_cameraForwardInput != 0)
                                 {
@@ -236,6 +231,10 @@ namespace SHH_Camera_Controller
 
                                 }
 
+                                MemoryUtility.WriteMemory(_process[0], _cameraCoordinateAddress, _cameraX, out bytesWritten);
+                                MemoryUtility.WriteMemory(_process[0], _cameraCoordinateAddress + 4, _cameraZ, out bytesWritten);
+                                MemoryUtility.WriteMemory(_process[0], _cameraCoordinateAddress + 8, _cameraY, out bytesWritten);
+
                             }
 
                             if (_mouseEnabled)
@@ -249,11 +248,15 @@ namespace SHH_Camera_Controller
 
                             }
 
-                            //Debug.WriteLine(_cameraX.ToString() + " , " + _cameraY.ToString() + " , " + _cameraZ.ToString());
+                            if (_isRecording)
+                            {
 
-                            MemoryUtility.WriteMemory(_process[0], _cameraCoordinateAddress, _cameraX, out bytesWritten);
-                            MemoryUtility.WriteMemory(_process[0], _cameraCoordinateAddress + 4, _cameraZ, out bytesWritten);
-                            MemoryUtility.WriteMemory(_process[0], _cameraCoordinateAddress + 8, _cameraY, out bytesWritten);
+                                Thread.Sleep(50); //Gives game enough time to draw frame will look choppy in-game but smooth in video. Set higher if game lags a lot when playing.
+
+                                _screenRecorder.CaptureFrame();
+
+                            }
+
 
                         }
 
@@ -366,12 +369,29 @@ namespace SHH_Camera_Controller
                     break;
                 case Key.R:
 
-                    _isRecording = !_isRecording;
+                    if(_recordEnabled)
+                        if (!_isRecording)
+                        {
 
-                    if (_isRecording) 
-                        RecordIndicator.Fill = Brushes.Red;
-                    else
-                        RecordIndicator.Fill = Brushes.Black;
+                            RecordIndicator.Fill = Brushes.Red;
+
+                            _screenRecorder = new ScreenRecorder("recording" + _recIndex++.ToString() + ".avi", 30, 70, 30);
+
+                            _isRecording = true;
+
+                        }
+                        else
+                        {
+
+                            _isRecording = false;
+
+                            RecordIndicator.Fill = Brushes.Black;
+
+                            _screenRecorder.Dispose();
+
+                            Thread.Sleep(100);
+
+                        }
 
                     break;
 
@@ -425,7 +445,6 @@ namespace SHH_Camera_Controller
 
                             InjectButton.IsEnabled = true;
                             AttachButton.IsEnabled = false;
-                            ScreenRec_CheckBox.IsEnabled = true;
 
                             _injectThread = new Thread(new ThreadStart(InjectThread));
                             _injectThread.Start();
@@ -471,9 +490,8 @@ namespace SHH_Camera_Controller
                     _cameraZ = BitConverter.ToSingle(MemoryUtility.ReadMemory(_process[0], _cameraCoordinateAddress + 4, 4, out bytesRead));
                     _cameraY = BitConverter.ToSingle(MemoryUtility.ReadMemory(_process[0], _cameraCoordinateAddress + 8, 4, out bytesRead));
 
-                    if(!_recordEnabled)
-                        MemoryUtility.WriteMemory(_process[0], _cameraXAssemblyAddress, new byte[] { 0x66, 0x0F, 0xD6, 0x42, 0xF8 }, out bytesWritten);
 
+                    MemoryUtility.WriteMemory(_process[0], _cameraXAssemblyAddress, new byte[] { 0x66, 0x0F, 0xD6, 0x42, 0xF8 }, out bytesWritten);
                     MemoryUtility.WriteMemory(_process[0], _cameraYAssemblyAddress, new byte[] { 0x90, 0x90, 0x90, 0x90, 0x90 }, out bytesWritten);
 
                     _isInjected = true;
@@ -481,6 +499,8 @@ namespace SHH_Camera_Controller
                     InjectButton.Content = "UNINJECT";
 
                     AMouse_CheckBox.IsEnabled = true;
+
+                    ScreenRec_CheckBox.IsEnabled = true;
 
                 }
                 else if (_isInjected)
@@ -492,6 +512,13 @@ namespace SHH_Camera_Controller
                     _cameraRight.Dispose();
                     _cameraUp.Dispose();
                     _cameraDown.Dispose();
+
+                    _cameraForward.ClearHotkeys();
+                    _cameraBackward.ClearHotkeys();
+                    _cameraLeft.ClearHotkeys();
+                    _cameraRight.ClearHotkeys();
+                    _cameraUp.ClearHotkeys();
+                    _cameraDown.ClearHotkeys();
 
                     if (_mouseEnabled)
                     {
@@ -513,23 +540,25 @@ namespace SHH_Camera_Controller
 
                     }
 
-                    _cameraForward.ClearHotkeys();
-                    _cameraBackward.ClearHotkeys();
-                    _cameraLeft.ClearHotkeys();
-                    _cameraRight.ClearHotkeys();
-                    _cameraUp.ClearHotkeys();
-                    _cameraDown.ClearHotkeys();
+                    if (_recordEnabled)
+                    {
+                        _screenRecord.Dispose();
+                        _screenRecord.ClearHotkeys();
 
-                    if(!_recordEnabled)
-                        MemoryUtility.WriteMemory(_process[0], _cameraXAssemblyAddress, new byte[] { 0x66, 0x0F, 0xD6, 0x42, 0x30 }, out bytesWritten);
+                        ScreenRec_CheckBox.IsChecked = false;
+                        ScreenRec_CheckBox.IsEnabled = false;
 
+                    }
+                    
+                    MemoryUtility.WriteMemory(_process[0], _cameraXAssemblyAddress, new byte[] { 0x66, 0x0F, 0xD6, 0x42, 0x30 }, out bytesWritten);
                     MemoryUtility.WriteMemory(_process[0], _cameraYAssemblyAddress, new byte[] { 0x66, 0x0F, 0xD6, 0x42, 0x38 }, out bytesWritten);
 
                     _isInjected = false;
 
                     InjectButton.Content = "INJECT";
 
-                    Thread.Sleep(2000);
+
+                    Thread.Sleep(500);
 
                 }
 
@@ -602,6 +631,8 @@ namespace SHH_Camera_Controller
             _mouseLeft.ClearHotkeys();
             _mouseRight.ClearHotkeys();
 
+            Thread.Sleep(500);
+
         }
 
         private void ScreenRec_CheckBox_Checked(object sender, RoutedEventArgs e)
@@ -633,7 +664,7 @@ namespace SHH_Camera_Controller
             _screenRecord.Dispose();
             _screenRecord.ClearHotkeys();
 
-            Thread.Sleep(2000);
+            Thread.Sleep(500);
 
         }
 

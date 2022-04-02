@@ -1,6 +1,14 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Imaging;
+using SharpAvi; //SharpAvi NuGet package
+using SharpAvi.Codecs; 
+using SharpAvi.Output;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Drew
 {
@@ -141,6 +149,145 @@ namespace Drew
         }
 
         #endregion
+
+    }
+
+    public class ScreenRecorder : IDisposable
+    {
+
+        //Set to only output Motion Jpeg
+
+        #region Fields
+
+        private Thread _writeThread;
+
+        private AviWriter _writer;
+        private IAviVideoStream _stream;
+
+        private int _index;
+        private int _writeIndex;
+        private int _maxElements;
+        private List<byte[]> _bufferList;
+
+        private byte[] _buffer;
+
+        private bool _isRecording;
+
+        public int Height { get; private set; }
+        public int Width { get; private set; }
+        public string FileName { get; private set; }
+        public int FrameRate { get; private set; }
+        public int Quality { get; private set; }
+
+        #endregion
+
+        public ScreenRecorder(string file_name, int frame_rate, int quality, int max_elements)
+        {
+
+            FileName = file_name;
+            FrameRate = frame_rate;
+            Quality = quality;
+
+            _maxElements = max_elements;
+
+            Height = (int)System.Windows.SystemParameters.PrimaryScreenHeight;
+            Width = (int)System.Windows.SystemParameters.PrimaryScreenWidth;
+
+            _index = _writeIndex = 0;
+            _bufferList = new List<byte[]>();
+
+            _buffer = new byte[Width * Height * 4];
+
+            _isRecording = true;
+
+            _writer = new AviWriter(FileName)
+            {
+                FramesPerSecond = FrameRate,
+                EmitIndex1 = true,
+            };
+
+            _stream = _writer.AddMJpegWpfVideoStream(Width, Height, Quality);
+
+            _stream.Name = "Drewcorder";
+
+            _writeThread = new Thread(WriteThread)
+            {
+                Name = typeof(ScreenRecorder).Name,
+                IsBackground = true,
+            };
+
+            _writeThread.Start();
+
+        }
+
+        public void Dispose()
+        {
+
+            _isRecording = false;
+
+            _writeThread.Join();
+
+            _writer.Close();
+
+        }
+
+        private void WriteThread()
+        {
+
+            Task videoWriteTask = null;
+
+            while(_isRecording)
+            {
+
+                videoWriteTask?.Wait();
+
+                if(_writeIndex != _index)
+                {
+
+                    videoWriteTask = _stream.WriteFrameAsync(true, _bufferList[_writeIndex], 0, _bufferList[_writeIndex].Length);
+
+                    if(++_writeIndex > _maxElements)
+                        _writeIndex = 0;
+
+                }
+
+                Thread.Sleep(10);
+
+            }
+
+            videoWriteTask?.Wait();
+
+        }
+
+        public void CaptureFrame()
+        {
+
+            using (Bitmap bmp = new Bitmap(Width, Height))
+            {
+
+                using (Graphics g = Graphics.FromImage(bmp))
+                {
+
+                    g.CopyFromScreen(Point.Empty, Point.Empty, new Size(Width, Height), CopyPixelOperation.SourceCopy);
+
+                    g.Flush();
+
+                    BitmapData bits = bmp.LockBits(new Rectangle(0, 0, Width, Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppRgb);
+
+                    Marshal.Copy(bits.Scan0, _buffer, 0, _buffer.Length);
+
+                    bmp.UnlockBits(bits);
+
+                    _bufferList.Insert(_index, _buffer);
+
+                }
+
+            }
+
+            if (++_index > _maxElements)
+                _index = 0;
+
+        }
 
     }
 
