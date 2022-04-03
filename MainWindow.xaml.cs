@@ -444,6 +444,8 @@ namespace SHH_Camera_Controller
                             _injectThread.Start();
                             while (!_injectThread.IsAlive) ;
 
+                            break;
+
                         }
 
                     }
@@ -497,7 +499,7 @@ namespace SHH_Camera_Controller
                     ScreenRec_CheckBox.IsEnabled = true;
 
                 }
-                else if (_isInjected)
+                else
                 {
 
                     _cameraForward.Dispose();
