@@ -196,70 +196,64 @@ namespace SHH_Camera_Controller
                         MemoryUtility.WriteMemory(_process[0], _cameraNewXAddress, 99999f, out bytesWritten);
 
 
-                        if (_isInjected)
+                        if (_cameraHorizontalInput != 0 || _cameraForwardInput != 0 || _cameraVerticalInput != 0)
                         {
 
-                            if (_cameraHorizontalInput != 0 || _cameraForwardInput != 0 || _cameraVerticalInput != 0)
+                            _cameraYawSine = BitConverter.ToSingle(MemoryUtility.ReadMemory(_process[0], _cameraYawAddress, 4, out bytesRead));
+                            _cameraYawCosine = BitConverter.ToSingle(MemoryUtility.ReadMemory(_process[0], _cameraYawAddress + 32, 4, out bytesRead));
+
+                            _cameraPitchSine = BitConverter.ToSingle(MemoryUtility.ReadMemory(_process[0], _cameraPitchAddress + 16, 4, out bytesRead));
+
+
+                            if (_cameraForwardInput != 0)
                             {
 
-                                _cameraYawSine = BitConverter.ToSingle(MemoryUtility.ReadMemory(_process[0], _cameraYawAddress, 4, out bytesRead));
-                                _cameraYawCosine = BitConverter.ToSingle(MemoryUtility.ReadMemory(_process[0], _cameraYawAddress + 32, 4, out bytesRead));
+                                _cameraY += (_cameraYawSine * _cameraSpeed) * (float)_cameraForwardInput;
+                                _cameraX += (_cameraYawCosine * _cameraSpeed) * (float)_cameraForwardInput;
+                                _cameraZ += (_cameraPitchSine * _cameraSpeed) * (float)_cameraForwardInput;
 
-                                _cameraPitchSine = BitConverter.ToSingle(MemoryUtility.ReadMemory(_process[0], _cameraPitchAddress + 16, 4, out bytesRead));
+                            }
+                            else if (_cameraHorizontalInput != 0)
+                            {
 
-
-                                if (_cameraForwardInput != 0)
-                                {
-
-                                    _cameraY += (_cameraYawSine * _cameraSpeed) * (float)_cameraForwardInput;
-                                    _cameraX += (_cameraYawCosine * _cameraSpeed) * (float)_cameraForwardInput;
-                                    _cameraZ += (_cameraPitchSine * _cameraSpeed) * (float)_cameraForwardInput;
-
-                                }
-                                else if (_cameraHorizontalInput != 0)
-                                {
-
-                                    _cameraX += (_cameraYawSine * _cameraSpeed) * (float)_cameraHorizontalInput;
-                                    _cameraY += (-_cameraYawCosine * _cameraSpeed) * (float)_cameraHorizontalInput;
-
-                                }
-
-                                if (_cameraVerticalInput != 0)
-                                {
-
-                                    _cameraZ += (float)_cameraVerticalInput * _cameraSpeed;
-
-                                }
-
-                                MemoryUtility.WriteMemory(_process[0], _cameraCoordinateAddress, _cameraX, out bytesWritten);
-                                MemoryUtility.WriteMemory(_process[0], _cameraCoordinateAddress + 4, _cameraZ, out bytesWritten);
-                                MemoryUtility.WriteMemory(_process[0], _cameraCoordinateAddress + 8, _cameraY, out bytesWritten);
+                                _cameraX += (_cameraYawSine * _cameraSpeed) * (float)_cameraHorizontalInput;
+                                _cameraY += (-_cameraYawCosine * _cameraSpeed) * (float)_cameraHorizontalInput;
 
                             }
 
-                            if (_mouseEnabled)
+                            if (_cameraVerticalInput != 0)
                             {
 
-                                if (_mouseHorizontalInput != 0)
-                                    MouseUtility.MoveMouseRelative(_mouseHorizontalInput * _mouseSensitivity, 0);
-
-                                if (_mouseVerticalInput != 0)
-                                    MouseUtility.MoveMouseRelative(0, _mouseVerticalInput * _mouseSensitivity);
+                                _cameraZ += (float)_cameraVerticalInput * _cameraSpeed;
 
                             }
 
-                            if (_isRecording)
-                            {
-
-                                Thread.Sleep(50); //Gives game enough time to draw frame will look choppy in-game but smooth in video.
-
-                                _screenRecorder.CaptureFrame();
-
-                            }
-
+                            MemoryUtility.WriteMemory(_process[0], _cameraCoordinateAddress, _cameraX, out bytesWritten);
+                            MemoryUtility.WriteMemory(_process[0], _cameraCoordinateAddress + 4, _cameraZ, out bytesWritten);
+                            MemoryUtility.WriteMemory(_process[0], _cameraCoordinateAddress + 8, _cameraY, out bytesWritten);
 
                         }
 
+                        if (_mouseEnabled)
+                        {
+
+                            if (_mouseHorizontalInput != 0)
+                                MouseUtility.MoveMouseRelative(_mouseHorizontalInput * _mouseSensitivity, 0);
+
+                            if (_mouseVerticalInput != 0)
+                                MouseUtility.MoveMouseRelative(0, _mouseVerticalInput * _mouseSensitivity);
+
+                        }
+
+                        if (_isRecording)
+                        {
+
+                            Thread.Sleep(50); //Gives game enough time to draw frame will look choppy in-game but smooth in video. This recording style is specific to a video project I'm making.
+                                              //This screen recording implementation will hopefully be smoothed out in the future.
+
+                            _screenRecorder.CaptureFrame();
+
+                        }
 
                     }
                     
