@@ -648,9 +648,6 @@ namespace SHH_Camera_Controller
 
             _screenRecord = new HotKey(Key.R, ModifierKeys.None, new Action<HotKey>(OnHotKeyHandler), true);
 
-            int bytesWritten;
-
-
         }
 
         private void ScreenRec_CheckBox_Unchecked(object sender, RoutedEventArgs e)
@@ -660,8 +657,6 @@ namespace SHH_Camera_Controller
             _isRecording = false;
 
             RecordIndicator.Fill = Brushes.Black;
-
-            int bytesWritten;
 
             _screenRecord.Dispose();
             _screenRecord.ClearHotkeys();
