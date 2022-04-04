@@ -538,6 +538,16 @@ namespace SHH_Camera_Controller
 
                     if (_recordEnabled)
                     {
+
+                        if (_isRecording)
+                        {
+
+                            _screenRecorder.Dispose();
+
+                            _isRecording = false;
+
+                        }
+
                         _screenRecord.Dispose();
                         _screenRecord.ClearHotkeys();
 
@@ -640,7 +650,6 @@ namespace SHH_Camera_Controller
 
             int bytesWritten;
 
-            MemoryUtility.WriteMemory(_process[0], _cameraXAssemblyAddress, new byte[] { 0x66, 0x0F, 0xD6, 0x42, 0xF8 }, out bytesWritten);
 
         }
 
@@ -653,9 +662,6 @@ namespace SHH_Camera_Controller
             RecordIndicator.Fill = Brushes.Black;
 
             int bytesWritten;
-
-            if(!_isInjected)
-                MemoryUtility.WriteMemory(_process[0], _cameraXAssemblyAddress, new byte[] { 0x66, 0x0F, 0xD6, 0x42, 0x30 }, out bytesWritten);
 
             _screenRecord.Dispose();
             _screenRecord.ClearHotkeys();
